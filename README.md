@@ -150,8 +150,16 @@ The components only use the hooks in `lib/hooks.ts`, so they do not change.
 
 ## Deployment
 
+Live: <https://imxde-code.github.io/celcomdigi-share2earn/>
+
 Pushing to `main` runs `.github/workflows/deploy.yml`, which builds the export
 with `NEXT_PUBLIC_BASE_PATH=/<repo>` and publishes `out/` to GitHub Pages.
+
+> **The repository is private, but the Pages site is not.** GitHub only supports
+> access-controlled Pages on Enterprise Cloud; on every other plan the published
+> site is reachable by anyone with the link. That is acceptable here because the
+> app contains nothing but fixture data — but do not put anything real behind
+> this URL.
 
 To build the same artifact locally:
 
