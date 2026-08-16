@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "share2earn-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 3000
+    },
+    {
+      "name": "share2earn-static",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "serve", "out", "-l", "4173", "--no-clipboard"],
+      "port": 4173
+    }
+  ]
+}
