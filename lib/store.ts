@@ -2,8 +2,8 @@
 
 import { DB_VERSION, seedDatabase } from "./seed";
 import { TASKS, buildOptions } from "./tasks";
-import { INDEPENDENT_PLANS } from "./family";
-import type { EligibilityOutcome, TransferRequest } from "./family";
+import { INDEPENDENT_PLANS, allocatedGb } from "./family";
+import type { DataRequest, EligibilityOutcome, TransferRequest } from "./family";
 import type {
   AppNotification,
   AuditEntry,
@@ -988,6 +988,155 @@ export function completeTransfer(id: string) {
   });
 }
 
+/* ------------------------------------------------------------------ */
+/* Family data sharing                                                 */
+/* ------------------------------------------------------------------ */
+
+export const selectDataRequest = (db: Database, id: string | null) =>
+  db.data_requests.find((r) => r.id === id) ?? null;
+
+export const selectDataRequestsFor = (db: Database, memberId: string) =>
+  db.data_requests
+    .filter((r) => r.member_user_id === memberId)
+    .sort((a, b) => b.created_at.localeCompare(a.created_at));
+
+/** Requests a principal still has to answer. */
+export const selectPendingDataRequests = (db: Database, principalId: string) =>
+  db.data_requests.filter(
+    (r) => r.principal_user_id === principalId && r.status === "PENDING"
+  );
+
+/**
+ * A member asks for a bigger slice of the shared pool. Nothing changes on the
+ * account until the principal says yes — the same consent rule the transfer
+ * journey follows, at a lower assurance level.
+ */
+export function requestFamilyData(
+  memberId: string,
+  gb: number,
+  reason: string
+): DataRequest | null {
+  return mutate((db) => {
+    const group = selectFamilyGroup(db, memberId);
+    if (!group) return null;
+
+    const request: DataRequest = {
+      id: `DAT-${30001 + db.data_requests.length}`,
+      member_user_id: memberId,
+      principal_user_id: group.principal_user_id,
+      requested_gb: gb,
+      reason,
+      status: "PENDING",
+      created_at: now(),
+    };
+    db.data_requests.push(request);
+
+    const member = selectUser(db, memberId);
+    logTransfer(db, memberId, request.id, "DATA_REQUESTED", `${gb}GB — ${reason}`);
+    track(db, "family_data_requested", memberId, request.id, null);
+    notifyTransfer(
+      db,
+      group.principal_user_id,
+      "DATA_REQUESTED",
+      `${member?.name ?? "A family member"} needs more data`,
+      `Asking for ${gb}GB — ${reason}`,
+      request.id
+    );
+    return request;
+  });
+}
+
+export function decideFamilyData(
+  id: string,
+  principalId: string,
+  approve: boolean
+) {
+  mutate((db) => {
+    const request = selectDataRequest(db, id);
+    if (!request || request.principal_user_id !== principalId) return;
+    if (request.status !== "PENDING") return;
+
+    request.status = approve ? "APPROVED" : "DECLINED";
+    request.decided_at = now();
+
+    if (approve) {
+      const group = selectFamilyGroup(db, request.member_user_id);
+      const member = group?.members.find((m) => m.user_id === request.member_user_id);
+      if (group && member) {
+        member.data_limit_gb += request.requested_gb;
+        // The pool grows with the top-up rather than starving the other lines.
+        if (allocatedGb(group) > group.shared_pool_gb) {
+          group.shared_pool_gb = allocatedGb(group);
+        }
+      }
+    }
+
+    logTransfer(
+      db,
+      principalId,
+      request.id,
+      approve ? "DATA_APPROVED" : "DATA_DECLINED",
+      `${request.requested_gb}GB`
+    );
+    track(db, approve ? "family_data_approved" : "family_data_declined", principalId, request.id, null);
+    notifyTransfer(
+      db,
+      request.member_user_id,
+      approve ? "DATA_APPROVED" : "DATA_DECLINED",
+      approve ? "More data added" : "Data request declined",
+      approve
+        ? `${request.requested_gb}GB added to your line.`
+        : "Your allowance is unchanged.",
+      request.id
+    );
+  });
+}
+
+/** Principal adjusts a line's slice directly. */
+export function setMemberDataLimit(
+  principalId: string,
+  memberId: string,
+  gb: number
+) {
+  mutate((db) => {
+    const group = selectFamilyGroup(db, principalId);
+    if (!group || group.principal_user_id !== principalId) return;
+    const member = group.members.find((m) => m.user_id === memberId);
+    if (!member) return;
+    const next = Math.max(0, Math.round(gb));
+    if (next === member.data_limit_gb) return;
+    logTransfer(
+      db,
+      principalId,
+      group.id,
+      "DATA_LIMIT_CHANGED",
+      `${memberId}: ${member.data_limit_gb}GB → ${next}GB`
+    );
+    member.data_limit_gb = next;
+    if (allocatedGb(group) > group.shared_pool_gb) {
+      group.shared_pool_gb = allocatedGb(group);
+    }
+  });
+}
+
+/** Stops or resumes a line drawing from the pool, without removing the line. */
+export function toggleMemberDataPause(principalId: string, memberId: string) {
+  mutate((db) => {
+    const group = selectFamilyGroup(db, principalId);
+    if (!group || group.principal_user_id !== principalId) return;
+    const member = group.members.find((m) => m.user_id === memberId);
+    if (!member) return;
+    member.data_paused = !member.data_paused;
+    logTransfer(
+      db,
+      principalId,
+      group.id,
+      member.data_paused ? "DATA_PAUSED" : "DATA_RESUMED",
+      memberId
+    );
+  });
+}
+
 /** Presenter action: wipes every request, reward and log back to the seed. */
 export function resetDemo() {
   mutate((db) => {
@@ -1005,5 +1154,6 @@ export function resetDemo() {
     db.events = fresh.events;
     db.family_groups = fresh.family_groups;
     db.transfer_requests = fresh.transfer_requests;
+    db.data_requests = fresh.data_requests;
   });
 }

@@ -23,9 +23,12 @@ import {
   completeTransfer,
   configureTransfer,
   confirmTransferIdentity,
+  decideFamilyData,
   principalDecide,
+  requestFamilyData,
   requestPrincipalApproval,
   resetDemo,
+  selectPendingDataRequests,
   selectTransferForMember,
   setTransferEligibility,
   startTransfer,
@@ -84,6 +87,7 @@ export default function FamilyDemoPage() {
   const [busy, setBusy] = useState(false);
 
   const transfer = selectTransferForMember(db, MEMBER.id);
+  const pendingData = selectPendingDataRequests(db, PRINCIPAL.id)[0] ?? null;
 
   // Keyed on the status string, not the record: the store mutates records in
   // place, so a memo keyed on the object would never recompute.
@@ -142,6 +146,24 @@ export default function FamilyDemoPage() {
     } finally {
       window.setTimeout(() => setBusy(false), 220);
     }
+  }
+
+  function askForData() {
+    if (busy) return;
+    setBusy(true);
+    requestFamilyData(MEMBER.id, 10, "Working from home this month");
+    setAinaPath("/family/data/");
+    setMumPath("/family/data/");
+    window.setTimeout(() => setBusy(false), 220);
+  }
+
+  function approveData() {
+    if (busy || !pendingData) return;
+    setBusy(true);
+    decideFamilyData(pendingData.id, PRINCIPAL.id, true);
+    setAinaPath("/family/data/");
+    setMumPath("/family/data/");
+    window.setTimeout(() => setBusy(false), 220);
   }
 
   function showException(outcome: EligibilityOutcome) {
@@ -205,6 +227,36 @@ export default function FamilyDemoPage() {
         <p className="mt-3 text-[14px] text-white/65">
           {nextStep ? nextStep.hint : "Aina is an independent CelcomDigi customer."}
         </p>
+
+        {/*
+          A second, shorter track. Sharing data is a CHANGE-level action, so the
+          owner is asked to confirm rather than to prove — the contrast with the
+          transfer above is the whole point of the adaptive model.
+        */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">
+          <span className="text-[12px] font-bold uppercase tracking-wide text-white/45">
+            Data sharing
+          </span>
+          <button
+            type="button"
+            onClick={askForData}
+            disabled={busy || !!pendingData}
+            className="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-white/10 px-3.5 text-[13px] font-semibold transition hover:bg-white/20 disabled:opacity-40"
+          >
+            Aina asks for 10GB
+          </button>
+          <button
+            type="button"
+            onClick={approveData}
+            disabled={busy || !pendingData}
+            className="inline-flex min-h-[40px] items-center gap-2 rounded-full bg-white/10 px-3.5 text-[13px] font-semibold transition hover:bg-white/20 disabled:opacity-40"
+          >
+            Mum confirms and shares
+          </button>
+          <span className="text-[12px] text-white/45">
+            Confirm it&apos;s me — not prove it&apos;s me
+          </span>
+        </div>
 
         {/* The unhappy paths are one click away, because that is what a board asks about. */}
         <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-white/10 pt-3">

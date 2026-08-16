@@ -1,7 +1,11 @@
 import type { Database } from "./types";
 
-/** Bumped when the shape changes; old demo data is discarded rather than migrated. */
-export const DB_VERSION = 2;
+/**
+ * Bumped when the shape changes; old demo data is discarded rather than
+ * migrated. Forgetting to bump leaves a stored blob missing a new collection,
+ * and the first selector to touch it throws.
+ */
+export const DB_VERSION = 3;
 
 const ISO = (daysAgo: number) =>
   new Date(Date.UTC(2026, 4, 1) - daysAgo * 86400000).toISOString();
@@ -79,6 +83,8 @@ export function seedDatabase(): Database {
         id: "fam_1",
         principal_user_id: "u_mum",
         monthly_total: 145,
+        // 120GB shared, 110GB handed out, 10GB still unallocated.
+        shared_pool_gb: 120,
         members: [
           {
             user_id: "u_mum",
@@ -88,15 +94,18 @@ export function seedDatabase(): Database {
             bill_contribution: 65,
             data_used_gb: 22.5,
             data_quota_gb: 65,
+            data_limit_gb: 40,
           },
           {
+            // Aina is near her limit — the reason she has to ask.
             user_id: "u_aina",
             msisdn: "012-111 2222",
             role: "SUPPLEMENTARY",
             plan_name: "Postpaid 5G",
             bill_contribution: 40,
-            data_used_gb: 31.6,
+            data_used_gb: 44.2,
             data_quota_gb: 50,
+            data_limit_gb: 50,
           },
           {
             user_id: "u_ayah",
@@ -106,12 +115,14 @@ export function seedDatabase(): Database {
             bill_contribution: 40,
             data_used_gb: 8.2,
             data_quota_gb: 20,
+            data_limit_gb: 20,
           },
         ],
       },
     ],
 
     transfer_requests: [],
+    data_requests: [],
 
     trusted_relationships: [
       {

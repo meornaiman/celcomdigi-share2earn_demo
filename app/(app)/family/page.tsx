@@ -95,9 +95,12 @@ export default function FamilyPage() {
               />
             </dl>
 
-            <div className="mt-4">
+            <div className="mt-4 space-y-2">
               <Button href={link("/family/manage")} advance>
                 Manage my line
+              </Button>
+              <Button href={link("/family/data")} variant="outline" size="md">
+                Family data sharing
               </Button>
             </div>
 
@@ -139,13 +142,13 @@ export default function FamilyPage() {
         <SectionTitle>Quick actions</SectionTitle>
         <ul className="grid grid-cols-3 gap-2">
           {[
-            { label: "View usage", Icon: IconData },
-            { label: "Add-ons", Icon: IconPlan },
-            { label: "SIM / eSIM", Icon: IconEsim },
-          ].map(({ label, Icon }) => (
+            { label: "Family data", Icon: IconData, href: "/family/data" },
+            { label: "Add-ons", Icon: IconPlan, href: "/family/manage" },
+            { label: "SIM / eSIM", Icon: IconEsim, href: "/family/manage" },
+          ].map(({ label, Icon, href }) => (
             <li key={label}>
               <Link
-                href={link("/family/manage")}
+                href={link(href)}
                 className="flex h-full flex-col items-center gap-2 rounded-card bg-surface p-3 text-center shadow-soft transition hover:shadow-lift"
               >
                 <span className="grid h-10 w-10 place-items-center rounded-[12px] bg-blue-100 text-blue-700">

@@ -244,6 +244,10 @@ export interface FamilyMember {
   bill_contribution: number;
   data_used_gb: number;
   data_quota_gb: number;
+  /** This line's slice of the shared family pool. */
+  data_limit_gb: number;
+  /** The principal can stop a line drawing from the pool without removing it. */
+  data_paused?: boolean;
 }
 
 export interface FamilyGroup {
@@ -251,6 +255,57 @@ export interface FamilyGroup {
   principal_user_id: string;
   members: FamilyMember[];
   monthly_total: number;
+  /** Total data the family plan provides each month, shared across the lines. */
+  shared_pool_gb: number;
+}
+
+/* ------------------------------------------------------------------ */
+/* Data sharing                                                        */
+/* ------------------------------------------------------------------ */
+
+/**
+ * A supplementary line asking the principal for a bigger slice of the pool.
+ *
+ * Deliberately sits at the CHANGE rung, not OWNERSHIP: giving a family member
+ * more data is a commercial change, so it asks the owner to confirm it's them
+ * and nothing more. Contrasting this with the transfer journey is how the demo
+ * shows that assurance tracks the action rather than the screen.
+ */
+export type DataRequestStatus = "PENDING" | "APPROVED" | "DECLINED";
+
+export interface DataRequest {
+  id: string;
+  member_user_id: string;
+  principal_user_id: string;
+  requested_gb: number;
+  reason: string;
+  status: DataRequestStatus;
+  created_at: string;
+  decided_at?: string;
+}
+
+/** Amounts offered when asking for more, so nobody types a number. */
+export const DATA_TOPUP_STEPS = [5, 10, 20];
+
+export const DATA_REQUEST_REASONS = [
+  "Working from home this month",
+  "Travelling and streaming more",
+  "Ran out before the cycle ends",
+  "Studying online",
+];
+
+/** Sum of what every line is allowed to draw. */
+export function allocatedGb(group: FamilyGroup): number {
+  return group.members.reduce((sum, m) => sum + m.data_limit_gb, 0);
+}
+
+/** Pool left to hand out. Never negative, even if the principal over-allocates. */
+export function unallocatedGb(group: FamilyGroup): number {
+  return Math.max(0, group.shared_pool_gb - allocatedGb(group));
+}
+
+export function usedGb(group: FamilyGroup): number {
+  return group.members.reduce((sum, m) => sum + m.data_used_gb, 0);
 }
 
 /* ------------------------------------------------------------------ */

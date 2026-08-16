@@ -4,7 +4,7 @@
  * UI layer.
  */
 
-import type { FamilyGroup, TransferRequest } from "./family";
+import type { DataRequest, FamilyGroup, TransferRequest } from "./family";
 
 export type TaskType = "BILL" | "ROAMING" | "PLAN" | "ESIM" | "ONBOARDING";
 
@@ -167,7 +167,10 @@ export type NotificationType =
   | "TRANSFER_APPROVAL_REQUESTED"
   | "TRANSFER_APPROVED"
   | "TRANSFER_DECLINED"
-  | "TRANSFER_COMPLETED";
+  | "TRANSFER_COMPLETED"
+  | "DATA_REQUESTED"
+  | "DATA_APPROVED"
+  | "DATA_DECLINED";
 
 export interface AppNotification {
   id: string;
@@ -227,6 +230,7 @@ export interface Database {
   /** Family Mobility — see lib/family.ts for the domain rules. */
   family_groups: FamilyGroup[];
   transfer_requests: TransferRequest[];
+  data_requests: DataRequest[];
   trusted_relationships: TrustedRelationship[];
   help_requests: HelpRequest[];
   task_options: TaskOption[];

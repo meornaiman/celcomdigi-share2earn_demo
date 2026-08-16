@@ -51,6 +51,12 @@ The **exception state** buttons jump straight to the unhappy paths: active
 contract, outstanding balance, low identity confidence, and not digitally
 eligible. None of them dead-ends the customer.
 
+The **data sharing** row runs the second, shorter story: Aina asks for 10GB
+from the shared family pool and Mum confirms. Worth showing right after the
+transfer, because the confirmation Mum gets is *"confirm it's me"* rather than
+*"prove it's me"* — same product, same owner, lower risk, less friction. That
+contrast is the adaptive model working.
+
 The security model lives in [`lib/family.ts`](lib/family.ts): three assurance
 levels — *don't interrupt me*, *confirm it's me*, *prove it's me* — with the
 action deciding which applies. Adaptive Identity means the right amount of
