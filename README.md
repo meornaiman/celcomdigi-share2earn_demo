@@ -37,6 +37,26 @@ code is shown on screen.
 | Ayah    | 0123 555 666  | Second trusted contact        |
 | Faiz    | 0123 777 888  | Prepaid, third trusted contact |
 
+### The presenter dashboard
+
+**`/demo`** is the one surface for showing this to a room. Everything the
+prototype does is reachable from it:
+
+- **Journey switcher** — Share2Earn, Family Mobility, Data sharing. Each track
+  swaps the script, the two personas, and the business impact panel
+- **Scripted steps** — click through in order; completed steps go green
+- **Exception states** — jump straight to the unhappy paths (Family Mobility)
+- **Jump to any screen** — pick a phone, then any screen in that journey, so a
+  question from the floor never needs a URL
+- **Feature coverage** — what the prototype covers, grouped, at the bottom
+- **Event stream** — the analytics events as they fire
+
+`/family-demo` opens the same dashboard on the Family Mobility track.
+
+The tracks share one data store, so order matters in one place: once Aina is
+independent she leaves the family pool, and the data-sharing track says so and
+offers a one-click reset rather than silently doing nothing.
+
 ### Family Mobility demo
 
 Open **`/family-demo`** on a wide screen. Aina (supplementary line) on the left,

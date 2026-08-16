@@ -15,14 +15,10 @@ export function DemoStage({
   title,
   subtitle,
   children,
-  otherHref,
-  otherLabel,
 }: {
   title: string;
   subtitle: string;
   children: ReactNode;
-  otherHref: string;
-  otherLabel: string;
 }) {
   return (
     <div className="min-h-dvh bg-navy-900 text-white">
@@ -45,12 +41,6 @@ export function DemoStage({
             </span>
             Realtime
           </span>
-          <Link
-            href={otherHref}
-            className="rounded-btn border-2 border-white/25 px-4 py-2 text-[14px] font-semibold transition hover:bg-white/10"
-          >
-            {otherLabel}
-          </Link>
           <Link
             href="/login"
             className="rounded-btn border-2 border-white/25 px-4 py-2 text-[14px] font-semibold transition hover:bg-white/10"
