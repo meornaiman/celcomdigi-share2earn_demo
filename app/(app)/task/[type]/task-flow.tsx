@@ -509,12 +509,12 @@ function PermissionPreview({
         </p>
       </Card>
 
-      <Card className="bg-navy-900 text-white">
-        <p className="mb-2 flex items-center gap-2 text-[15px] font-bold">
-          <IconLock size={18} className="text-yellow-500" />
+      <Card tone="tint">
+        <p className="mb-2 flex items-center gap-2 text-[15px] font-bold text-navy-900">
+          <IconLock size={18} className="text-blue-700" />
           {t("helpers.hiddenTitle")}
         </p>
-        <p className="text-[14px] leading-snug text-white/75">
+        <p className="text-[14px] leading-snug text-navy-900/75">
           {t("helpers.hiddenItems")}
         </p>
       </Card>

@@ -105,17 +105,31 @@ export function Button({
 /* Surfaces                                                            */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Card backgrounds are chosen here rather than by a `bg-*` class passed in.
+ * Tailwind resolves conflicting utilities by stylesheet order, not by the order
+ * they appear in the class string, so an override silently lost to the card's
+ * own `bg-surface` and left white text on a white card.
+ */
+const CARD_TONES = {
+  surface: "bg-surface text-ink",
+  navy: "bg-navy-900 text-white",
+  tint: "bg-blue-100 text-navy-900",
+} as const;
+
 export function Card({
   children,
   className = "",
+  tone = "surface",
   as: Tag = "div",
 }: {
   children: ReactNode;
   className?: string;
+  tone?: keyof typeof CARD_TONES;
   as?: "div" | "section" | "li" | "article";
 }) {
   return (
-    <Tag className={`rounded-card bg-surface p-4 shadow-soft ${className}`}>
+    <Tag className={`rounded-card p-4 shadow-soft ${CARD_TONES[tone]} ${className}`}>
       {children}
     </Tag>
   );

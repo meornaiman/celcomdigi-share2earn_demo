@@ -88,8 +88,8 @@ export default function HelpPage() {
         )}
       </section>
 
-      <Card className="bg-blue-100">
-        <p className="text-[15px] leading-snug text-navy-900">
+      <Card tone="tint">
+        <p className="text-[15px] leading-snug">
           <strong className="font-bold">The helper recommends. You approve.</strong>{" "}
           Nothing changes on an account until its owner says yes.
         </p>

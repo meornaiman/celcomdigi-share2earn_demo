@@ -1,6 +1,14 @@
 "use client";
 
-import { Card, EmptyState, PageTitle, Pill, SectionTitle, Stat } from "@/components/ui";
+import {
+  Card,
+  EmptyState,
+  PageTitle,
+  Pill,
+  ProgressBar,
+  SectionTitle,
+  Stat,
+} from "@/components/ui";
 import { IconRewards, IconSparkle } from "@/components/icons";
 import { useLang, useT } from "@/components/providers";
 import { timeAgo, useCurrentUser, useDb } from "@/lib/hooks";
@@ -45,23 +53,23 @@ export default function RewardsPage() {
         />
       </div>
 
-      <Card className="bg-navy-900 text-white">
+      <Card>
         <div className="flex items-center gap-3">
           <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-yellow-500 text-navy-900">
             <IconSparkle size={24} />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[19px] font-bold leading-tight">
+            <p className="text-[19px] font-bold leading-tight text-ink">
               {t("rewards.progressTitle", { level })}
             </p>
-            <p className="text-[14px] text-white/70">
+            <p className="text-[14px] text-ink-soft">
               {t("rewards.assists", { n: progress.successful_assists })}
             </p>
           </div>
         </div>
 
         <div className="mt-4">
-          <div className="mb-1.5 flex items-baseline justify-between text-[13px] text-white/75">
+          <div className="mb-1.5 flex items-baseline justify-between text-[13px] text-ink-soft">
             <span>{t("rewards.progressXp", { into: intoLevel, total: XP_PER_LEVEL })}</span>
             <span>
               {t("rewards.toNext", {
@@ -70,19 +78,11 @@ export default function RewardsPage() {
               })}
             </span>
           </div>
-          <div
-            role="progressbar"
-            aria-valuenow={intoLevel}
-            aria-valuemin={0}
-            aria-valuemax={XP_PER_LEVEL}
-            aria-label={t("rewards.progressTitle", { level })}
-            className="h-2.5 w-full overflow-hidden rounded-full bg-white/15"
-          >
-            <div
-              className="h-full rounded-full bg-yellow-500 transition-[width] duration-500"
-              style={{ width: `${(intoLevel / XP_PER_LEVEL) * 100}%` }}
-            />
-          </div>
+          <ProgressBar
+            value={intoLevel}
+            max={XP_PER_LEVEL}
+            label={t("rewards.progressTitle", { level })}
+          />
         </div>
       </Card>
 
