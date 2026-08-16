@@ -159,7 +159,7 @@ function ToastCard({
         </span>
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-soft">
-            CelcomDigi Share2Earn
+            CelcomDigi AIdealist
           </p>
           <p className="mt-0.5 truncate text-[15px] font-semibold text-ink">
             {toast.title}

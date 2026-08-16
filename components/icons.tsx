@@ -219,6 +219,23 @@ export const IconChart = (p: IconProps) => (
   </Svg>
 );
 
+/** Face-authentication mark: bracket corners around a face. */
+export const IconFaceId = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M4 8.4V6.2A2.2 2.2 0 0 1 6.2 4h2.2M15.6 4h2.2A2.2 2.2 0 0 1 20 6.2v2.2M20 15.6v2.2a2.2 2.2 0 0 1-2.2 2.2h-2.2M8.4 20H6.2A2.2 2.2 0 0 1 4 17.8v-2.2" />
+    <path d="M9 10.2v1.2M15 10.2v1.2" />
+    <path d="M12 10.4v3h-.8" />
+    <path d="M9.4 15.6a3.6 3.6 0 0 0 5.2 0" />
+  </Svg>
+);
+
+export const IconCard = (p: IconProps) => (
+  <Svg {...p}>
+    <rect x="2.8" y="5.5" width="18.4" height="13" rx="2.4" />
+    <path d="M2.8 9.8h18.4M6.4 14.4h3.2" />
+  </Svg>
+);
+
 export const IconHeart = (p: IconProps) => (
   <Svg {...p}>
     <path d="M12 20s-7.4-4.4-7.4-9.4A4.2 4.2 0 0 1 12 8.2a4.2 4.2 0 0 1 7.4 2.4c0 5-7.4 9.4-7.4 9.4z" />

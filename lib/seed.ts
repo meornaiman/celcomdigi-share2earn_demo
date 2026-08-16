@@ -1,6 +1,7 @@
 import type { Database } from "./types";
 
-export const DB_VERSION = 1;
+/** Bumped when the shape changes; old demo data is discarded rather than migrated. */
+export const DB_VERSION = 2;
 
 const ISO = (daysAgo: number) =>
   new Date(Date.UTC(2026, 4, 1) - daysAgo * 86400000).toISOString();
@@ -16,7 +17,7 @@ export function seedDatabase(): Database {
       {
         id: "u_mum",
         name: "Mum",
-        mobile_number: "0123 333 444",
+        mobile_number: "012-333 4444",
         email: "mum@example.my",
         avatar_url: "",
         customer_id: "CD-8841203",
@@ -28,23 +29,25 @@ export function seedDatabase(): Database {
         data_balance_gb: 42.5,
       },
       {
+        // Aina is 23, working, and still on a supplementary line under Mum's
+        // family account — the persona the Family Mobility journey is built for.
         id: "u_aina",
         name: "Aina",
-        mobile_number: "0123 111 222",
+        mobile_number: "012-111 2222",
         email: "aina@example.my",
         avatar_url: "",
         customer_id: "CD-7729114",
         created_at: ISO(1200),
         accent: "#082B75",
         account_type: "Postpaid",
-        plan_name: "Postpaid 100",
-        plan_price: 100,
-        data_balance_gb: 88.0,
+        plan_name: "Postpaid 5G",
+        plan_price: 0,
+        data_balance_gb: 18.4,
       },
       {
         id: "u_ayah",
         name: "Ayah",
-        mobile_number: "0123 555 666",
+        mobile_number: "012-555 6666",
         email: "ayah@example.my",
         avatar_url: "",
         customer_id: "CD-5510882",
@@ -58,7 +61,7 @@ export function seedDatabase(): Database {
       {
         id: "u_faiz",
         name: "Faiz",
-        mobile_number: "0123 777 888",
+        mobile_number: "012-777 8888",
         email: "faiz@example.my",
         avatar_url: "",
         customer_id: "CD-3390457",
@@ -70,6 +73,45 @@ export function seedDatabase(): Database {
         data_balance_gb: 6.2,
       },
     ],
+
+    family_groups: [
+      {
+        id: "fam_1",
+        principal_user_id: "u_mum",
+        monthly_total: 145,
+        members: [
+          {
+            user_id: "u_mum",
+            msisdn: "012-333 4444",
+            role: "PRINCIPAL",
+            plan_name: "Postpaid 65",
+            bill_contribution: 65,
+            data_used_gb: 22.5,
+            data_quota_gb: 65,
+          },
+          {
+            user_id: "u_aina",
+            msisdn: "012-111 2222",
+            role: "SUPPLEMENTARY",
+            plan_name: "Postpaid 5G",
+            bill_contribution: 40,
+            data_used_gb: 31.6,
+            data_quota_gb: 50,
+          },
+          {
+            user_id: "u_ayah",
+            msisdn: "012-555 6666",
+            role: "SUPPLEMENTARY",
+            plan_name: "Postpaid 40",
+            bill_contribution: 40,
+            data_used_gb: 8.2,
+            data_quota_gb: 20,
+          },
+        ],
+      },
+    ],
+
+    transfer_requests: [],
 
     trusted_relationships: [
       {

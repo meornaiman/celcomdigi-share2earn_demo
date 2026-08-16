@@ -4,6 +4,8 @@
  * UI layer.
  */
 
+import type { FamilyGroup, TransferRequest } from "./family";
+
 export type TaskType = "BILL" | "ROAMING" | "PLAN" | "ESIM" | "ONBOARDING";
 
 export type RiskLevel = "GREEN" | "AMBER" | "RED";
@@ -161,7 +163,11 @@ export type NotificationType =
   | "OWNER_APPROVED"
   | "OWNER_REJECTED"
   | "HELPER_DECLINED"
-  | "TASK_COMPLETED";
+  | "TASK_COMPLETED"
+  | "TRANSFER_APPROVAL_REQUESTED"
+  | "TRANSFER_APPROVED"
+  | "TRANSFER_DECLINED"
+  | "TRANSFER_COMPLETED";
 
 export interface AppNotification {
   id: string;
@@ -170,6 +176,8 @@ export interface AppNotification {
   title: string;
   body: string;
   help_request_id: string;
+  /** Set instead of help_request_id when the notification is about a transfer. */
+  transfer_id?: string;
   read: boolean;
   created_at: string;
 }
@@ -216,6 +224,9 @@ export interface TrackedEvent {
 export interface Database {
   version: number;
   users: User[];
+  /** Family Mobility — see lib/family.ts for the domain rules. */
+  family_groups: FamilyGroup[];
+  transfer_requests: TransferRequest[];
   trusted_relationships: TrustedRelationship[];
   help_requests: HelpRequest[];
   task_options: TaskOption[];

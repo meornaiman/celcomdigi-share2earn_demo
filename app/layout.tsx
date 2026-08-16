@@ -14,14 +14,14 @@ const jakarta = Plus_Jakarta_Sans({
 const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export const metadata: Metadata = {
-  title: "CelcomDigi Share2Earn",
+  title: "CelcomDigi AIdealist",
   description:
-    "Help someone go digital. Both of you benefit. Ask someone you trust for help with a CelcomDigi task — you always approve before anything happens.",
+    "Help when you need it, independence when you're ready. Ask someone you trust for help with a CelcomDigi task, or move your own number onto your own account.",
   manifest: `${basePath}/manifest.webmanifest`,
-  applicationName: "Share2Earn",
+  applicationName: "AIdealist",
   appleWebApp: {
     capable: true,
-    title: "Share2Earn",
+    title: "AIdealist",
     statusBarStyle: "default",
   },
   icons: {

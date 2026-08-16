@@ -1,9 +1,23 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Pill } from "@/components/ui";
-import { IconCheck, IconRefresh, IconSend, IconSparkle } from "@/components/icons";
+import { useEffect, useMemo, useState } from "react";
+import {
+  DEMO_BASE,
+  DemoDivider,
+  DemoPhone,
+  DemoStage,
+  ImpactPanel,
+} from "@/components/demo-chrome";
+import {
+  IconChart,
+  IconCheck,
+  IconData,
+  IconHelp,
+  IconLock,
+  IconRefresh,
+  IconShield,
+  IconUsers,
+} from "@/components/icons";
 import { timeAgo, useDb, useHydrated } from "@/lib/hooks";
 import {
   approveRecommendation,
@@ -15,8 +29,6 @@ import {
   sendRecommendation,
 } from "@/lib/store";
 import { TASKS } from "@/lib/tasks";
-
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 const OWNER = { id: "u_mum", name: "Mum", role: "Account owner" };
 const HELPER = { id: "u_aina", name: "Aina", role: "Trusted helper" };
@@ -30,6 +42,19 @@ const SCRIPT = [
 ] as const;
 
 type StepKey = (typeof SCRIPT)[number]["key"];
+
+const IMPACT = [
+  { label: "Higher self-service", detail: "Tasks finish in-app instead of stalling", Icon: IconChart },
+  { label: "Lower call centre reliance", detail: "A trusted person answers first", Icon: IconHelp },
+  { label: "Better app engagement", detail: "Two customers active per request", Icon: IconUsers },
+  { label: "More digital transactions", detail: "Assisted purchases the owner approves", Icon: IconData },
+];
+
+const TRUST = [
+  { label: "Task-based permission", Icon: IconLock },
+  { label: "Owner approval required", Icon: IconCheck },
+  { label: "Sensitive data protected", Icon: IconShield },
+];
 
 export default function DemoPage() {
   const hydrated = useHydrated();
@@ -50,16 +75,17 @@ export default function DemoPage() {
     setRequestId(latest.id);
   }, [db.help_requests, requestId]);
 
+  // Keyed on the status string, not the record: the store mutates records in
+  // place, so a memo keyed on the object would never recompute.
+  const status = request?.status;
   const done: Record<StepKey, boolean> = useMemo(() => {
-    const status = request?.status;
     return {
       REQUEST: !!request,
       RECOMMEND: !!status && !["SENT", "HELPER_VIEWED", "HELPER_ACCEPTED"].includes(status),
-      APPROVE:
-        !!status && ["OWNER_APPROVED", "EXECUTING", "COMPLETED"].includes(status),
+      APPROVE: !!status && ["OWNER_APPROVED", "EXECUTING", "COMPLETED"].includes(status),
       COMPLETE: status === "COMPLETED",
     };
-  }, [request]);
+  }, [status, request]);
 
   function runStep(step: StepKey) {
     if (busy) return;
@@ -131,181 +157,96 @@ export default function DemoPage() {
     setHelperPath("/home/");
   }
 
+  const nextStep = SCRIPT.find((s) => !done[s.key]);
+
   return (
-    <div className="min-h-dvh bg-navy-900 text-white">
-      <div className="mx-auto max-w-6xl px-5 py-6">
-        <header className="flex flex-wrap items-center gap-4">
-          <span
-            aria-hidden="true"
-            className="grid h-11 w-11 place-items-center rounded-[13px] bg-yellow-500 text-[13px] font-bold text-navy-900"
+    <DemoStage
+      title="Share2Earn — presenter mode"
+      subtitle="Two accounts, one browser, live sync between both panels."
+      otherHref="/family-demo"
+      otherLabel="Family Mobility demo"
+    >
+      <section className="mt-6 rounded-card bg-white/8 p-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {SCRIPT.map((step, i) => {
+            const complete = done[step.key];
+            const isNext = !complete && SCRIPT.slice(0, i).every((s) => done[s.key]);
+            return (
+              <button
+                key={step.key}
+                type="button"
+                onClick={() => runStep(step.key)}
+                disabled={busy || complete || !isNext}
+                title={step.hint}
+                className={`inline-flex min-h-[46px] items-center gap-2 rounded-btn px-4 text-[15px] font-semibold transition disabled:cursor-not-allowed ${
+                  complete
+                    ? "bg-green-500/20 text-green-500"
+                    : isNext
+                      ? "bg-yellow-500 text-navy-900 hover:bg-yellow-300"
+                      : "bg-white/10 text-white/40"
+                }`}
+              >
+                {complete ? <IconCheck size={17} strokeWidth={2.8} /> : null}
+                <span className="tabular-nums opacity-60">{i + 1}</span>
+                {step.label}
+              </button>
+            );
+          })}
+
+          <button
+            type="button"
+            onClick={fullReset}
+            className="ml-auto inline-flex min-h-[46px] items-center gap-2 rounded-btn border-2 border-white/25 px-4 text-[15px] font-semibold transition hover:bg-white/10"
           >
-            CD
-          </span>
-          <div className="mr-auto">
-            <h1 className="text-[22px] font-bold tracking-[-0.02em]">
-              Share2Earn — presenter mode
-            </h1>
-            <p className="text-[14px] text-white/65">
-              Two accounts, one browser, live sync between both panels.
-            </p>
-          </div>
-          <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1.5 text-[13px] font-semibold">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-70" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-green-500" />
+            <IconRefresh size={17} />
+            Reset demo
+          </button>
+        </div>
+
+        <p className="mt-3 text-[14px] text-white/65">
+          {nextStep ? nextStep.hint : "Scenario complete — both sides have been rewarded."}
+        </p>
+
+        {request ? (
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
+            <span className="rounded-full bg-white/10 px-2.5 py-1 font-mono font-semibold">
+              {request.id}
             </span>
-            Realtime
-          </span>
-          <Link
-            href="/login"
-            className="rounded-btn border-2 border-white/25 px-4 py-2 text-[14px] font-semibold transition hover:bg-white/10"
-          >
-            Open full app
-          </Link>
-        </header>
-
-        <section className="mt-6 rounded-card bg-white/8 p-4">
-          <div className="flex flex-wrap items-center gap-2">
-            {SCRIPT.map((step, i) => {
-              const complete = done[step.key];
-              const isNext =
-                !complete && SCRIPT.slice(0, i).every((s) => done[s.key]);
-              return (
-                <button
-                  key={step.key}
-                  type="button"
-                  onClick={() => runStep(step.key)}
-                  disabled={busy || complete || !isNext}
-                  title={step.hint}
-                  className={`inline-flex min-h-[46px] items-center gap-2 rounded-btn px-4 text-[15px] font-semibold transition disabled:cursor-not-allowed ${
-                    complete
-                      ? "bg-green-500/20 text-green-500"
-                      : isNext
-                        ? "bg-yellow-500 text-navy-900 hover:bg-yellow-300"
-                        : "bg-white/10 text-white/40"
-                  }`}
-                >
-                  {complete ? <IconCheck size={17} strokeWidth={2.8} /> : null}
-                  <span className="tabular-nums opacity-60">{i + 1}</span>
-                  {step.label}
-                </button>
-              );
-            })}
-
-            <button
-              type="button"
-              onClick={fullReset}
-              className="ml-auto inline-flex min-h-[46px] items-center gap-2 rounded-btn border-2 border-white/25 px-4 text-[15px] font-semibold transition hover:bg-white/10"
-            >
-              <IconRefresh size={17} />
-              Reset demo
-            </button>
+            <span className="rounded-full bg-white/10 px-2.5 py-1 font-semibold">
+              {TASKS[request.task_type].label}
+            </span>
+            <span className="rounded-full bg-yellow-500/25 px-2.5 py-1 font-semibold text-yellow-300">
+              {request.status}
+            </span>
+            <span className="text-white/50">{timeAgo(request.created_at)}</span>
           </div>
+        ) : null}
+      </section>
 
-          <p className="mt-3 text-[14px] text-white/65">
-            {(() => {
-              const next = SCRIPT.find((s) => !done[s.key]);
-              if (!next) return "Scenario complete — both sides have been rewarded.";
-              return next.hint;
-            })()}
-          </p>
-
-          {request ? (
-            <div className="mt-3 flex flex-wrap items-center gap-2 text-[13px]">
-              <span className="rounded-full bg-white/10 px-2.5 py-1 font-mono font-semibold">
-                {request.id}
-              </span>
-              <span className="rounded-full bg-white/10 px-2.5 py-1 font-semibold">
-                {TASKS[request.task_type].label}
-              </span>
-              <span className="rounded-full bg-yellow-500/25 px-2.5 py-1 font-semibold text-yellow-300">
-                {request.status}
-              </span>
-              <span className="text-white/50">{timeAgo(request.created_at)}</span>
-            </div>
-          ) : null}
-        </section>
-
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_auto_1fr]">
-          <Panel
-            person={OWNER}
-            path={ownerPath}
-            ready={hydrated}
+      <div className="mt-6 flex flex-col gap-6 lg:flex-row">
+        <div className="grid flex-1 gap-6 lg:grid-cols-[1fr_auto_1fr]">
+          <DemoPhone
+            name={OWNER.name}
+            role={OWNER.role}
             accent="#0057D9"
-          />
-
-          <div className="hidden flex-col items-center justify-center gap-3 lg:flex">
-            <span className="h-24 w-px bg-white/15" />
-            <span className="rotate-90 whitespace-nowrap text-[12px] font-bold uppercase tracking-[0.2em] text-white/45">
-              realtime
-            </span>
-            <span className="h-24 w-px bg-white/15" />
-          </div>
-
-          <Panel
-            person={HELPER}
-            path={helperPath}
             ready={hydrated}
+            src={`${DEMO_BASE}${ownerPath}${ownerPath.includes("?") ? "&" : "?"}as=${OWNER.id}`}
+          />
+          <DemoDivider />
+          <DemoPhone
+            name={HELPER.name}
+            role={HELPER.role}
             accent="#FFD400"
+            ready={hydrated}
+            src={`${DEMO_BASE}${helperPath}${helperPath.includes("?") ? "&" : "?"}as=${HELPER.id}`}
           />
         </div>
 
-        <EventTicker />
-      </div>
-    </div>
-  );
-}
-
-function Panel({
-  person,
-  path,
-  ready,
-  accent,
-}: {
-  person: { id: string; name: string; role: string };
-  path: string;
-  ready: boolean;
-  accent: string;
-}) {
-  const frameRef = useRef<HTMLIFrameElement>(null);
-  const separator = path.includes("?") ? "&" : "?";
-  const src = `${BASE}${path}${separator}as=${person.id}`;
-
-  return (
-    <div className="flex flex-col items-center">
-      <div className="mb-3 flex items-center gap-2.5">
-        <span
-          aria-hidden="true"
-          className="h-3 w-3 rounded-full"
-          style={{ background: accent }}
-        />
-        <p className="text-[17px] font-bold">{person.name}</p>
-        <span className="rounded-full bg-white/10 px-2.5 py-0.5 text-[12px] font-semibold text-white/70">
-          {person.role}
-        </span>
+        <ImpactPanel impact={IMPACT} trust={TRUST} />
       </div>
 
-      {/* Phone bezel keeps the mobile-first design honest during a demo. */}
-      <div className="w-full max-w-[392px] rounded-[42px] bg-black/45 p-2.5 shadow-lift ring-1 ring-white/10">
-        <div className="relative overflow-hidden rounded-[34px] bg-canvas">
-          <span
-            aria-hidden="true"
-            className="absolute left-1/2 top-2 z-10 h-5 w-24 -translate-x-1/2 rounded-full bg-black/80"
-          />
-          {ready ? (
-            <iframe
-              ref={frameRef}
-              key={src}
-              src={src}
-              title={`${person.name} — ${person.role}`}
-              className="h-[720px] w-full border-0"
-            />
-          ) : (
-            <div className="h-[720px] w-full" />
-          )}
-        </div>
-      </div>
-    </div>
+      <EventTicker />
+    </DemoStage>
   );
 }
 

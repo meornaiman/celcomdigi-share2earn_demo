@@ -2,6 +2,8 @@
 
 import { DB_VERSION, seedDatabase } from "./seed";
 import { TASKS, buildOptions } from "./tasks";
+import { INDEPENDENT_PLANS } from "./family";
+import type { EligibilityOutcome, TransferRequest } from "./family";
 import type {
   AppNotification,
   AuditEntry,
@@ -745,6 +747,247 @@ export function revokeTrustedHelper(relationshipId: string, ownerId: string) {
   });
 }
 
+/* ------------------------------------------------------------------ */
+/* Family Mobility                                                     */
+/* ------------------------------------------------------------------ */
+
+export const selectFamilyGroup = (db: Database, userId: string) =>
+  db.family_groups.find((g) => g.members.some((m) => m.user_id === userId)) ?? null;
+
+export const selectFamilyMember = (db: Database, userId: string) =>
+  selectFamilyGroup(db, userId)?.members.find((m) => m.user_id === userId) ?? null;
+
+export const selectTransfer = (db: Database, id: string | null) =>
+  db.transfer_requests.find((t) => t.id === id) ?? null;
+
+/** The live transfer for a member, if one is in flight or finished. */
+export const selectTransferForMember = (db: Database, userId: string) =>
+  db.transfer_requests.find((t) => t.member_user_id === userId) ?? null;
+
+/** Transfers waiting on this principal's consent. */
+export const selectTransfersAwaiting = (db: Database, principalId: string) =>
+  db.transfer_requests.filter(
+    (t) => t.principal_user_id === principalId && t.status === "AWAITING_PRINCIPAL"
+  );
+
+function notifyTransfer(
+  db: Database,
+  user_id: string,
+  type: NotificationType,
+  title: string,
+  body: string,
+  transfer_id: string
+) {
+  db.notifications.unshift({
+    id: uid("ntf"),
+    user_id,
+    type,
+    title,
+    body,
+    help_request_id: "",
+    transfer_id,
+    read: false,
+    created_at: now(),
+  });
+}
+
+function logTransfer(
+  db: Database,
+  actor: string,
+  transferId: string,
+  event: string,
+  detail: string
+) {
+  db.audit_log.unshift({
+    id: uid("aud"),
+    actor_user_id: actor,
+    help_request_id: transferId,
+    event,
+    detail,
+    created_at: now(),
+  });
+}
+
+/**
+ * Opens a transfer and records the eligibility outcome. The outcome is passed
+ * in rather than computed so the presenter can demonstrate the exception
+ * states, which is where the concept's handling of the unhappy path shows.
+ */
+export function startTransfer(
+  memberId: string,
+  eligibility: EligibilityOutcome = "ELIGIBLE"
+): TransferRequest | null {
+  return mutate((db) => {
+    const group = selectFamilyGroup(db, memberId);
+    const member = group?.members.find((m) => m.user_id === memberId);
+    if (!group || !member) return null;
+
+    // One transfer per member; restarting replaces the previous attempt.
+    db.transfer_requests = db.transfer_requests.filter(
+      (t) => t.member_user_id !== memberId
+    );
+
+    const transfer: TransferRequest = {
+      id: `TRF-${20001 + db.transfer_requests.length}`,
+      member_user_id: memberId,
+      principal_user_id: group.principal_user_id,
+      msisdn: member.msisdn,
+      status: eligibility === "ELIGIBLE" ? "ELIGIBILITY_CHECKED" : "BLOCKED",
+      eligibility,
+      reused_signals: [],
+      created_at: now(),
+    };
+    db.transfer_requests.push(transfer);
+
+    logTransfer(
+      db,
+      memberId,
+      transfer.id,
+      "TRANSFER_STARTED",
+      `Eligibility: ${eligibility}`
+    );
+    track(db, "family_transfer_started", memberId, transfer.id, null);
+    return transfer;
+  });
+}
+
+/** Presenter override so any exception state can be shown on demand. */
+export function setTransferEligibility(id: string, outcome: EligibilityOutcome) {
+  mutate((db) => {
+    const t = selectTransfer(db, id);
+    if (!t) return;
+    t.eligibility = outcome;
+    t.status = outcome === "ELIGIBLE" ? "ELIGIBILITY_CHECKED" : "BLOCKED";
+    logTransfer(db, "system", t.id, "ELIGIBILITY_SET", outcome);
+  });
+}
+
+/**
+ * The adaptive-identity moment: the signals already held are recorded as
+ * reused, and exactly one step-up is added because ownership is changing.
+ */
+export function confirmTransferIdentity(
+  id: string,
+  method: string,
+  reusedSignals: string[]
+) {
+  mutate((db) => {
+    const t = selectTransfer(db, id);
+    if (!t || t.status === "BLOCKED") return;
+    t.status = "IDENTITY_CONFIRMED";
+    t.reused_signals = reusedSignals;
+    t.stepped_up_with = method;
+    logTransfer(
+      db,
+      t.member_user_id,
+      t.id,
+      "IDENTITY_CONFIRMED",
+      `Reused: ${reusedSignals.join(", ")} · stepped up with ${method}`
+    );
+    track(db, "adaptive_identity_step_up", t.member_user_id, t.id, null);
+  });
+}
+
+export function configureTransfer(id: string, planId: string, paymentMethod: string) {
+  mutate((db) => {
+    const t = selectTransfer(db, id);
+    if (!t) return;
+    t.chosen_plan_id = planId;
+    t.payment_method = paymentMethod;
+    t.status = "ACCOUNT_CONFIGURED";
+    logTransfer(db, t.member_user_id, t.id, "ACCOUNT_CONFIGURED", `${planId} · ${paymentMethod}`);
+  });
+}
+
+/** Consent is never assumed: the principal is asked, explicitly. */
+export function requestPrincipalApproval(id: string) {
+  mutate((db) => {
+    const t = selectTransfer(db, id);
+    if (!t) return;
+    t.status = "AWAITING_PRINCIPAL";
+    const member = selectUser(db, t.member_user_id);
+    logTransfer(db, t.member_user_id, t.id, "APPROVAL_REQUESTED", t.principal_user_id);
+    track(db, "transfer_approval_requested", t.member_user_id, t.id, null);
+    notifyTransfer(
+      db,
+      t.principal_user_id,
+      "TRANSFER_APPROVAL_REQUESTED",
+      `${member?.name ?? "A family member"} wants to become independent`,
+      `${t.msisdn} would move to their own account.`,
+      t.id
+    );
+  });
+}
+
+export function principalDecide(id: string, principalId: string, approve: boolean) {
+  mutate((db) => {
+    const t = selectTransfer(db, id);
+    if (!t || t.principal_user_id !== principalId) return;
+    if (t.status !== "AWAITING_PRINCIPAL") return;
+
+    t.status = approve ? "PRINCIPAL_APPROVED" : "PRINCIPAL_DECLINED";
+    logTransfer(
+      db,
+      principalId,
+      t.id,
+      approve ? "PRINCIPAL_APPROVED" : "PRINCIPAL_DECLINED",
+      `Owner consent ${approve ? "given" : "withheld"}`
+    );
+    track(db, approve ? "transfer_approved" : "transfer_declined", principalId, t.id, null);
+    notifyTransfer(
+      db,
+      t.member_user_id,
+      approve ? "TRANSFER_APPROVED" : "TRANSFER_DECLINED",
+      approve ? "Transfer approved" : "Transfer not approved",
+      approve
+        ? "Setting up your own account now."
+        : "The account owner declined this time.",
+      t.id
+    );
+  });
+}
+
+/** Applies the move: the line leaves the family group and keeps its number. */
+export function completeTransfer(id: string) {
+  mutate((db) => {
+    const t = selectTransfer(db, id);
+    if (!t || t.status !== "PRINCIPAL_APPROVED") return;
+
+    const group = selectFamilyGroup(db, t.member_user_id);
+    const member = group?.members.find((m) => m.user_id === t.member_user_id);
+    if (group && member) {
+      group.members = group.members.filter((m) => m.user_id !== t.member_user_id);
+      group.monthly_total = Math.max(
+        0,
+        group.monthly_total - member.bill_contribution
+      );
+    }
+
+    const user = selectUser(db, t.member_user_id);
+    const plan = INDEPENDENT_PLANS.find((p) => p.id === t.chosen_plan_id);
+    if (user && plan) {
+      user.plan_name = plan.name;
+      user.plan_price = plan.price;
+    }
+
+    t.status = "COMPLETED";
+    t.completed_at = now();
+    logTransfer(db, "system", t.id, "TRANSFER_COMPLETED", `${t.msisdn} is now independent`);
+    track(db, "transfer_completed", t.member_user_id, t.id, null);
+
+    [t.member_user_id, t.principal_user_id].forEach((u) =>
+      notifyTransfer(
+        db,
+        u,
+        "TRANSFER_COMPLETED",
+        "Transfer completed",
+        `${t.msisdn} now has its own CelcomDigi account.`,
+        t.id
+      )
+    );
+  });
+}
+
 /** Presenter action: wipes every request, reward and log back to the seed. */
 export function resetDemo() {
   mutate((db) => {
@@ -760,5 +1003,7 @@ export function resetDemo() {
     db.helper_progress = fresh.helper_progress;
     db.audit_log = fresh.audit_log;
     db.events = fresh.events;
+    db.family_groups = fresh.family_groups;
+    db.transfer_requests = fresh.transfer_requests;
   });
 }

@@ -11,8 +11,8 @@ export const dynamic = "force-static";
  */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "CelcomDigi Share2Earn",
-    short_name: "Share2Earn",
+    name: "CelcomDigi AIdealist",
+    short_name: "AIdealist",
     description:
       "Ask someone you trust for help with a CelcomDigi task. You always approve before anything happens.",
     start_url: `${basePath}/home/`,

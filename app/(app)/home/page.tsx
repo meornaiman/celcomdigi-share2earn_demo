@@ -8,7 +8,7 @@ import { TaskIcon } from "@/components/task-icon";
 import { IconChevronRight, IconUsers } from "@/components/icons";
 import { useT } from "@/components/providers";
 import { useAppLink, useCurrentUser, useDb } from "@/lib/hooks";
-import { selectActionable, trackEvent } from "@/lib/store";
+import { selectActionable, selectFamilyGroup, trackEvent } from "@/lib/store";
 import { TASK_ORDER, taskSlug } from "@/lib/tasks";
 import {
   TASK_SHORTCUT_KEYS,
@@ -38,6 +38,10 @@ export default function HomePage() {
   if (!user) return null;
 
   const { asOwner, asHelper } = selectActionable(db, user.id);
+  const family = selectFamilyGroup(db, user.id);
+  const myLine = family?.members.find(
+    (m) => m.user_id === user.id && m.role === "SUPPLEMENTARY"
+  );
 
   return (
     <div className="space-y-6">
@@ -112,6 +116,26 @@ export default function HomePage() {
           </Button>
         </div>
       </Card>
+
+      {family ? (
+        <Link
+          href={link("/family")}
+          className="flex items-center gap-3 rounded-card bg-surface p-3.5 shadow-soft transition hover:shadow-lift"
+        >
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[13px] bg-blue-100 text-blue-700">
+            <IconUsers size={22} />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[16px] font-bold text-ink">My family</span>
+            <span className="block truncate text-[13.5px] text-ink-soft">
+              {myLine
+                ? `${family.members.length} lines · your line is supplementary`
+                : `${family.members.length} lines on this account`}
+            </span>
+          </span>
+          <IconChevronRight size={19} className="shrink-0 text-ink-soft" />
+        </Link>
+      ) : null}
 
       {asHelper.length > 0 ? (
         <section>

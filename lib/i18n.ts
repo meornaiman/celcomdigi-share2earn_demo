@@ -32,8 +32,8 @@ const en = {
   "nav.rewards": "Rewards",
   "nav.profile": "Profile",
 
-  "login.title": "Share2Earn",
-  "login.tagline": "Help someone go digital. Both of you benefit.",
+  "login.title": "AIdealist",
+  "login.tagline": "Help when you need it. Independence when you're ready.",
   "login.mobileLabel": "Mobile number",
   "login.mobilePlaceholder": "01X XXX XXXX",
   "login.sendOtp": "Send code",
@@ -227,8 +227,8 @@ const ms: Record<TranslationKey, string> = {
   "nav.rewards": "Ganjaran",
   "nav.profile": "Profil",
 
-  "login.title": "Share2Earn",
-  "login.tagline": "Bantu seseorang jadi digital. Kedua-dua dapat manfaat.",
+  "login.title": "AIdealist",
+  "login.tagline": "Bantuan bila perlu. Kebebasan bila anda sedia.",
   "login.mobileLabel": "Nombor telefon",
   "login.mobilePlaceholder": "01X XXX XXXX",
   "login.sendOtp": "Hantar kod",

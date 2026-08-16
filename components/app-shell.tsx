@@ -74,7 +74,7 @@ function BootSplash() {
         <span className="h-1.5 w-24 overflow-hidden rounded-full bg-blue-100">
           <span className="block h-full w-1/2 animate-pulse rounded-full bg-blue-500" />
         </span>
-        <span className="sr-only">Loading Share2Earn</span>
+        <span className="sr-only">Loading AIdealist</span>
       </div>
     </div>
   );
@@ -119,7 +119,7 @@ function TopBar() {
       <Link
         href={link("/home")}
         className="flex items-center gap-2.5"
-        aria-label="Share2Earn home"
+        aria-label="AIdealist home"
       >
         <span
           aria-hidden="true"
@@ -129,9 +129,11 @@ function TopBar() {
         >
           CD
         </span>
-        <span className="text-[15px] font-bold tracking-[-0.01em]">
-          Share2Earn
-        </span>
+        {/*
+          AIdealist is the app. Share2Earn and Family Mobility are the journeys
+          inside it, so the wordmark stays neutral between them.
+        */}
+        <span className="text-[15px] font-bold tracking-[-0.01em]">AIdealist</span>
       </Link>
 
       <div className="ml-auto flex items-center gap-1">

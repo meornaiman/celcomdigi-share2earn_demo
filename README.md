@@ -1,13 +1,22 @@
-# CelcomDigi Share2Earn
+# CelcomDigi AIdealist
 
-> Help someone go digital. Both of you benefit.
+> Help when you need it. Independence when you're ready.
 
-A mobile-first web app where a customer who is stuck on a digital CelcomDigi
-task can ask someone they trust for help. The helper reviews a task-scoped slice
-of the account, recommends an option, and sends it back. **The owner always has
-final approval** — nothing is bought, changed or activated until they say yes.
+A mobile-first concept app carrying two connected journeys.
 
-Built from [`DESIGN.md`](DESIGN.md).
+**Share2Earn** — a customer stuck on a digital task asks someone they trust for
+help. The helper reviews a task-scoped slice of the account, recommends an
+option, and sends it back. **The owner always has final approval** — nothing is
+bought, changed or activated until they say yes. Built from
+[`DESIGN.md`](DESIGN.md).
+
+**Family Mobility, powered by Adaptive Identity** — a supplementary line leaves
+the family account and becomes its own CelcomDigi account, keeping its number.
+Trust the customer already established is reused, and verification steps up only
+where the action itself adds risk. **The account owner's consent is always
+required.**
+
+Together: *help me → build my confidence → give me autonomy → keep me.*
 
 ---
 
@@ -28,7 +37,26 @@ code is shown on screen.
 | Ayah    | 0123 555 666  | Second trusted contact        |
 | Faiz    | 0123 777 888  | Prepaid, third trusted contact |
 
-### The 90-second demo
+### Family Mobility demo
+
+Open **`/family-demo`** on a wide screen. Aina (supplementary line) on the left,
+Mum (account owner) on the right, with the Business Impact panel beside them.
+
+1. **Check eligibility** — the line is checked before anything is asked of her
+2. **Adaptive identity** — three signals reused, one confirmation added
+3. **Set up account** — her own plan and billing, then the owner is asked
+4. **Principal approves** — Mum confirms it's her, then releases the line
+
+The **exception state** buttons jump straight to the unhappy paths: active
+contract, outstanding balance, low identity confidence, and not digitally
+eligible. None of them dead-ends the customer.
+
+The security model lives in [`lib/family.ts`](lib/family.ts): three assurance
+levels — *don't interrupt me*, *confirm it's me*, *prove it's me* — with the
+action deciding which applies. Adaptive Identity means the right amount of
+security, never less of it.
+
+### The Share2Earn 90-second demo
 
 Open **`/demo`** on a wide screen. Two phone frames run side by side — Mum on
 the left, Aina on the right — sharing one live data store. Drive it either by

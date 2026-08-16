@@ -24,7 +24,7 @@ export default function Index() {
         <span className="grid h-16 w-16 place-items-center rounded-[18px] bg-navy-900 text-[17px] font-bold text-yellow-500">
           CD
         </span>
-        <p className="text-[15px] font-semibold text-ink-soft">Share2Earn</p>
+        <p className="text-[15px] font-semibold text-ink-soft">AIdealist</p>
       </div>
     </div>
   );
