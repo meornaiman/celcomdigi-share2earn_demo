@@ -219,6 +219,31 @@ export const IconChart = (p: IconProps) => (
   </Svg>
 );
 
+export const IconHeart = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M12 20s-7.4-4.4-7.4-9.4A4.2 4.2 0 0 1 12 8.2a4.2 4.2 0 0 1 7.4 2.4c0 5-7.4 9.4-7.4 9.4z" />
+  </Svg>
+);
+
+export const IconPhoneCall = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M8.2 3.8 10.4 8l-2 2.1a11 11 0 0 0 5.5 5.5l2.1-2 4.2 2.2v3a2 2 0 0 1-2.2 2A16.8 16.8 0 0 1 3.2 6.1 2 2 0 0 1 5.2 3.8z" />
+  </Svg>
+);
+
+export const IconTag = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M11 3.5H20.5V13l-8.8 8.8a1.6 1.6 0 0 1-2.3 0l-6.2-6.2a1.6 1.6 0 0 1 0-2.3z" />
+    <path d="M16.4 7.6h.01" />
+  </Svg>
+);
+
+export const IconBolt = (p: IconProps) => (
+  <Svg {...p}>
+    <path d="M13.2 2.8 4.8 13.4h6L10 21.2l8.4-10.6h-6z" />
+  </Svg>
+);
+
 export const IconData = (p: IconProps) => (
   <Svg {...p}>
     <ellipse cx="12" cy="6.5" rx="7.5" ry="3" />

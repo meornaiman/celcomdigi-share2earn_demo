@@ -12,11 +12,13 @@ import {
   Field,
   PageTitle,
   RiskBadge,
+  ScreenHeader,
   SecurityNote,
   Sheet,
   StatusBadge,
   TextArea,
 } from "@/components/ui";
+import { Confetti } from "@/components/confetti";
 import { RequestContextPanel } from "@/components/request-context";
 import {
   FeatureList,
@@ -114,16 +116,20 @@ export default function RequestPage() {
     );
   }
 
+  const other = selectUser(
+    db,
+    isOwner ? request.helper_user_id : request.owner_user_id
+  );
+  const header = headerCopy({ request, isOwner, otherName: other?.name, t });
+
   return (
     <div className="space-y-5">
-      <button
-        type="button"
-        onClick={() => router.push(link("/home"))}
-        className="-ml-1 inline-flex items-center gap-1.5 text-[15px] font-semibold text-blue-700"
-      >
-        <IconArrowLeft size={18} />
-        {t("common.back")}
-      </button>
+      <ScreenHeader
+        title={header.title}
+        sub={header.sub}
+        backLabel={t("common.back")}
+        onBack={() => router.push(link("/home"))}
+      />
 
       {isOwner ? (
         <OwnerView request={request} user={user} justSent={justSent} />
@@ -134,6 +140,36 @@ export default function RequestPage() {
       <AuditTrail requestId={request.id} />
     </div>
   );
+}
+
+/**
+ * One header for every state of the request, so the screen always names who it
+ * is about and what is being asked of the reader.
+ */
+function headerCopy({
+  request,
+  isOwner,
+  otherName,
+  t,
+}: {
+  request: HelpRequest;
+  isOwner: boolean;
+  otherName?: string;
+  t: ReturnType<typeof useT>;
+}): { title: string; sub: string } {
+  const label = TASKS[request.task_type].label;
+  const name = otherName ?? (isOwner ? "your helper" : "they");
+
+  if (isOwner && ["RECOMMENDATION_SENT", "OWNER_REVIEWING"].includes(request.status)) {
+    return { title: t("approve.title", { name }), sub: t("approve.subtitle") };
+  }
+  if (!isOwner && ["SENT", "HELPER_VIEWED", "HELPER_ACCEPTED"].includes(request.status)) {
+    return {
+      title: t("request.helperTitle", { name }),
+      sub: t("request.helperSubtitle"),
+    };
+  }
+  return { title: `${label} · ${name}`, sub: request.id };
 }
 
 /* ------------------------------------------------------------------ */
@@ -223,28 +259,20 @@ function OwnerView({
   if (recommendation && chosen) {
     return (
       <>
-        <div className="flex items-center gap-3">
-          <Avatar name={helper?.name ?? "?"} accent={helper?.accent} size={52} />
-          <div>
-            <h1 className="text-[24px] font-bold leading-tight tracking-[-0.02em] text-ink">
-              {t("approve.title", { name: helper?.name ?? "Your helper" })}
-            </h1>
-            <p className="text-[14px] text-ink-soft">
-              {timeAgo(recommendation.created_at, lang)} · {request.id}
-            </p>
-          </div>
-        </div>
-
         <OptionSummary option={chosen} highlight />
 
         {recommendation.message ? (
-          <Card>
-            <p className="text-[13px] font-semibold uppercase tracking-wide text-ink-soft">
-              {t("approve.note", { name: helper?.name ?? "Helper" })}
-            </p>
-            <p className="mt-1 text-[16px] italic leading-snug text-ink">
-              “{recommendation.message}”
-            </p>
+          <Card className="flex gap-3">
+            <Avatar name={helper?.name ?? "?"} accent={helper?.accent} size={40} />
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-ink-soft">
+                {t("approve.note", { name: helper?.name ?? "Helper" })} ·{" "}
+                {timeAgo(recommendation.created_at, lang)}
+              </p>
+              <p className="mt-0.5 text-[16px] leading-snug text-ink">
+                “{recommendation.message}”
+              </p>
+            </div>
           </Card>
         ) : null}
 
@@ -431,20 +459,8 @@ function HelperView({ request, user }: { request: HelpRequest; user: User }) {
 
   return (
     <>
-      <div className="flex items-center gap-3">
-        <Avatar name={owner?.name ?? "?"} accent={owner?.accent} size={52} />
-        <div>
-          <h1 className="text-[24px] font-bold leading-tight tracking-[-0.02em] text-ink">
-            {t("request.helperTitle", { name: owner?.name ?? "Someone" })}
-          </h1>
-          <p className="text-[15px] text-ink-soft">{t("request.helperSubtitle")}</p>
-          <p className="text-[13px] text-ink-soft">
-            {def.label} · {timeAgo(request.created_at, lang)} · {request.id}
-          </p>
-        </div>
-      </div>
-
       <div className="flex flex-wrap items-center gap-2">
+        <Avatar name={owner?.name ?? "?"} accent={owner?.accent} size={32} />
         <RiskBadge risk={def.risk} />
         <StatusBadge status={request.status} label={t(`status.${request.status}`)} />
       </div>
@@ -610,8 +626,9 @@ function SuccessView({ request, user }: { request: HelpRequest; user: User }) {
 
   return (
     <div className="space-y-5">
-      <div className="animate-pop rounded-card bg-navy-900 p-6 text-center text-white shadow-lift">
-        <span className="mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-green-500 text-white">
+      <div className="animate-pop relative overflow-hidden rounded-card bg-navy-900 p-6 text-center text-white shadow-lift">
+        <Confetti />
+        <span className="animate-pop relative mx-auto mb-4 grid h-16 w-16 place-items-center rounded-full bg-green-500 text-white">
           <IconCheck size={32} strokeWidth={2.8} />
         </span>
         <h1 className="text-[26px] font-bold leading-tight tracking-[-0.02em]">

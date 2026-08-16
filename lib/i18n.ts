@@ -48,6 +48,12 @@ const en = {
   "login.changeNumber": "Use a different number",
 
   "home.greeting": "Hello, {name}",
+  "home.goodMorning": "Good morning, {name}",
+  "home.goodAfternoon": "Good afternoon, {name}",
+  "home.goodEvening": "Good evening, {name}",
+  "home.accountSummary": "Account summary",
+  "home.quickShortcuts": "Quick shortcuts",
+  "home.mobileLabel": "Mobile number",
   "home.heroTitle": "Need help with your CelcomDigi task?",
   "home.tryMyself": "Try myself",
   "home.askTrusted": "Ask someone I trust",
@@ -77,6 +83,13 @@ const en = {
   "task.onboarding.title": "Get set up digitally",
   "task.onboarding.blurb": "Help me get set up digitally",
 
+  // Short forms for the home shortcut row, where full titles will not fit.
+  "shortcut.BILL": "Bill",
+  "shortcut.ROAMING": "Roaming",
+  "shortcut.PLAN": "Plan",
+  "shortcut.ESIM": "eSIM",
+  "shortcut.ONBOARDING": "Setup",
+
   "risk.GREEN": "Low risk",
   "risk.AMBER": "Approval needed",
   "risk.RED": "Not supported",
@@ -94,6 +107,7 @@ const en = {
   "task.selfServeHint": "Still unsure? Ask someone you trust.",
 
   "helpers.title": "Choose someone you trust",
+  "helpers.subtitle": "They will help you complete this task.",
   "helpers.security": "Only information required for this task will be shared.",
   "helpers.send": "Send help request",
   "helpers.shareTitle": "What {name} will see",
@@ -124,6 +138,7 @@ const en = {
   "request.riskAmber": "{name} must approve before anything happens",
 
   "approve.title": "{name} recommends this for you",
+  "approve.subtitle": "Review the recommendation.",
   "approve.security": "Nothing will be purchased until you approve.",
   "approve.securityGreen": "This is an explanation only. Nothing changes on your account.",
   "approve.approve": "Approve",
@@ -228,6 +243,12 @@ const ms: Record<TranslationKey, string> = {
   "login.changeNumber": "Guna nombor lain",
 
   "home.greeting": "Hai, {name}",
+  "home.goodMorning": "Selamat pagi, {name}",
+  "home.goodAfternoon": "Selamat petang, {name}",
+  "home.goodEvening": "Selamat malam, {name}",
+  "home.accountSummary": "Ringkasan akaun",
+  "home.quickShortcuts": "Pintasan pantas",
+  "home.mobileLabel": "Nombor telefon",
   "home.heroTitle": "Perlukan bantuan dengan tugasan CelcomDigi anda?",
   "home.tryMyself": "Cuba sendiri",
   "home.askTrusted": "Tanya orang yang saya percaya",
@@ -257,6 +278,12 @@ const ms: Record<TranslationKey, string> = {
   "task.onboarding.title": "Bantu saya bersedia secara digital",
   "task.onboarding.blurb": "Bantu saya bersedia secara digital",
 
+  "shortcut.BILL": "Bil",
+  "shortcut.ROAMING": "Roaming",
+  "shortcut.PLAN": "Pelan",
+  "shortcut.ESIM": "eSIM",
+  "shortcut.ONBOARDING": "Mula",
+
   "risk.GREEN": "Risiko rendah",
   "risk.AMBER": "Perlu kelulusan",
   "risk.RED": "Tidak disokong",
@@ -274,6 +301,7 @@ const ms: Record<TranslationKey, string> = {
   "task.selfServeHint": "Masih tidak pasti? Tanya orang yang anda percaya.",
 
   "helpers.title": "Pilih orang yang anda percaya",
+  "helpers.subtitle": "Mereka akan bantu anda selesaikan tugasan ini.",
   "helpers.security": "Hanya maklumat yang diperlukan untuk tugasan ini akan dikongsi.",
   "helpers.send": "Hantar permintaan bantuan",
   "helpers.shareTitle": "Apa yang {name} akan lihat",
@@ -304,6 +332,7 @@ const ms: Record<TranslationKey, string> = {
   "request.riskAmber": "{name} mesti luluskan sebelum apa-apa berlaku",
 
   "approve.title": "{name} mengesyorkan ini untuk anda",
+  "approve.subtitle": "Semak syor ini.",
   "approve.security": "Tiada pembelian sehingga anda luluskan.",
   "approve.securityGreen": "Ini penjelasan sahaja. Tiada perubahan pada akaun anda.",
   "approve.approve": "Luluskan",
@@ -378,6 +407,14 @@ export const TASK_TITLE_KEYS = {
   PLAN: "task.plan.title",
   ESIM: "task.esim.title",
   ONBOARDING: "task.onboarding.title",
+} as const satisfies Record<string, TranslationKey>;
+
+export const TASK_SHORTCUT_KEYS = {
+  BILL: "shortcut.BILL",
+  ROAMING: "shortcut.ROAMING",
+  PLAN: "shortcut.PLAN",
+  ESIM: "shortcut.ESIM",
+  ONBOARDING: "shortcut.ONBOARDING",
 } as const satisfies Record<string, TranslationKey>;
 
 export const TASK_BLURB_KEYS = {

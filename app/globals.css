@@ -98,6 +98,21 @@ a[role="button"],
   }
 }
 
+/* Confetti: fall the height of the success card while tumbling. */
+@keyframes s2e-fall {
+  0% {
+    opacity: 0;
+    transform: translateY(-24px) rotate(var(--tilt, 0deg));
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(240px) rotate(var(--spin, 180deg));
+  }
+}
+
 @keyframes s2e-pulse {
   0%,
   100% {

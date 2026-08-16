@@ -8,8 +8,8 @@ import {
   Card,
   ChoiceCard,
   Field,
-  PageTitle,
   RiskBadge,
+  ScreenHeader,
   SecurityNote,
   Select,
   TextArea,
@@ -17,13 +17,7 @@ import {
 } from "@/components/ui";
 import { TaskIcon } from "@/components/task-icon";
 import { OptionSummary } from "@/components/option-card";
-import {
-  IconArrowLeft,
-  IconInfo,
-  IconLock,
-  IconSend,
-  IconUsers,
-} from "@/components/icons";
+import { IconInfo, IconLock, IconSend, IconUsers } from "@/components/icons";
 import { useT } from "@/components/providers";
 import { useAppLink, useCurrentUser, useDb, useQueryParam } from "@/lib/hooks";
 import { createHelpRequest, selectHelpers, trackEvent } from "@/lib/store";
@@ -172,31 +166,33 @@ export function TaskFlow({ taskType }: { taskType: TaskType }) {
 
   return (
     <div className="space-y-5">
-      <button
-        type="button"
-        onClick={() =>
-          step === "CONTEXT" ? router.back() : setStep("CONTEXT")
+      <ScreenHeader
+        onBack={() => (step === "CONTEXT" ? router.back() : setStep("CONTEXT"))}
+        backLabel={t("common.back")}
+        title={
+          step === "HELPER"
+            ? t("helpers.title")
+            : step === "SELF"
+              ? t("task.selfServeTitle")
+              : t(TASK_TITLE_KEYS[taskType])
         }
-        className="-ml-1 inline-flex items-center gap-1.5 text-[15px] font-semibold text-blue-700"
-      >
-        <IconArrowLeft size={18} />
-        {t("common.back")}
-      </button>
+        sub={
+          step === "HELPER"
+            ? t("helpers.subtitle")
+            : step === "SELF"
+              ? context.headline
+              : t(TASK_BLURB_KEYS[taskType])
+        }
+        trailing={
+          step === "CONTEXT" ? (
+            <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[13px] bg-blue-100 text-blue-700">
+              <TaskIcon type={taskType} size={22} />
+            </span>
+          ) : null
+        }
+      />
 
-      <div className="flex items-start gap-3">
-        <span className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-blue-100 text-blue-700">
-          <TaskIcon type={taskType} size={24} />
-        </span>
-        <div className="flex-1">
-          <PageTitle sub={t(TASK_BLURB_KEYS[taskType])}>
-            {t(TASK_TITLE_KEYS[taskType])}
-          </PageTitle>
-        </div>
-      </div>
-
-      <div className="-mt-3">
-        <RiskBadge risk={def.risk} />
-      </div>
+      {step === "CONTEXT" ? <RiskBadge risk={def.risk} /> : null}
 
       {step === "CONTEXT" ? (
         <>
@@ -325,10 +321,6 @@ export function TaskFlow({ taskType }: { taskType: TaskType }) {
 
       {step === "HELPER" ? (
         <>
-          <PageTitle>{t("helpers.title")}</PageTitle>
-
-          <SecurityNote>{t("helpers.security")}</SecurityNote>
-
           {helpers.length === 0 ? (
             <Card>
               <p className="text-[15px] text-ink-soft">{t("helpers.empty")}</p>
@@ -363,8 +355,11 @@ export function TaskFlow({ taskType }: { taskType: TaskType }) {
             }
           />
 
+          {/* The promise sits directly above the button that acts on it. */}
+          <SecurityNote tone="lock">{t("helpers.security")}</SecurityNote>
+
           <Button
-            variant="primary"
+            variant="brand"
             onClick={send}
             disabled={!helperId || sending}
             icon={<IconSend size={19} />}
@@ -432,8 +427,6 @@ function SelfServe({
 
   return (
     <div className="space-y-4">
-      <PageTitle sub={context.headline}>{t("task.selfServeTitle")}</PageTitle>
-
       {highlight ? (
         <SecurityNote>
           Everything here is read-only. Nothing is bought or changed until you
@@ -454,7 +447,7 @@ function SelfServe({
           <IconInfo size={19} className="mt-px shrink-0 text-blue-700" />
           {t("task.selfServeHint")}
         </p>
-        <Button variant="primary" onClick={onAskInstead} icon={<IconUsers size={20} />}>
+        <Button variant="primary" advance onClick={onAskInstead} icon={<IconUsers size={20} />}>
           {t("task.askTrusted")}
         </Button>
       </Card>

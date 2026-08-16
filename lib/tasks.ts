@@ -148,7 +148,12 @@ export function buildOptions(
   switch (taskType) {
     case "ROAMING": {
       const where = ctx.destination ?? "your destination";
-      const pass = (days: number, gb: number, price: number, calls: string) => ({
+      const pass = (
+        days: number,
+        gb: number,
+        price: number,
+        calls: string
+      ): OptionSeed => ({
         title: `${days}-Day Pass`,
         subtitle: `${gb}GB data in ${where}`,
         price,
@@ -158,6 +163,11 @@ export function buildOptions(
           "Unlimited social",
           `Valid for ${days * 24} hours`,
           `${calls} of calls`,
+        ],
+        highlights: [
+          { icon: "data", title: `${gb}GB`, caption: "High speed data" },
+          { icon: "social", title: "Unlimited", caption: "Social apps" },
+          { icon: "time", title: `${days * 24} hours`, caption: "Validity" },
         ],
         metadata_json: { days, data_gb: gb, calls, sms: "Unlimited" },
         recommended: false,
@@ -173,7 +183,7 @@ export function buildOptions(
         data: string,
         hotspot: string,
         extra: string
-      ) => ({
+      ): OptionSeed => ({
         title: `Postpaid ${price}`,
         subtitle: `${data}, unlimited calls`,
         price,
@@ -183,6 +193,17 @@ export function buildOptions(
           "Unlimited calls and SMS",
           `${hotspot} hotspot`,
           saving(price) > 0 ? `Saves ${formatMoney(saving(price))} a month` : extra,
+        ],
+        highlights: [
+          { icon: "data", title: data, caption: "Each month" },
+          { icon: "calls", title: "Unlimited", caption: "Calls and SMS" },
+          saving(price) > 0
+            ? {
+                icon: "save" as const,
+                title: formatMoney(saving(price)),
+                caption: "Saved monthly",
+              }
+            : { icon: "social" as const, title: hotspot, caption: "Hotspot" },
         ],
         metadata_json: { saving: saving(price), hotspot },
         recommended: false,

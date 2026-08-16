@@ -86,10 +86,15 @@ function TopBar() {
   const t = useT();
   const link = useAppLink();
   const toast = useToast();
+  const pathname = usePathname();
   const { lang, setLang } = useLang();
   const [langOpen, setLangOpen] = useState(false);
 
   const unread = user ? selectUnreadCount(db, user.id) : 0;
+
+  // Home opens on a navy band; the bar joins it instead of drawing a seam
+  // across the top of the brand colour.
+  const onNavy = samePath(pathname, "/home");
 
   // Every notification that lands while the app is open is surfaced as a card
   // in the same shape a Web Push payload would carry (DESIGN.md §9).
@@ -104,7 +109,13 @@ function TopBar() {
   if (!user) return null;
 
   return (
-    <div className="sticky top-0 z-30 flex items-center gap-2 border-b border-blue-100/80 bg-canvas/92 px-4 py-2.5 backdrop-blur">
+    <div
+      className={`sticky top-0 z-30 flex items-center gap-2 px-4 py-2.5 transition-colors ${
+        onNavy
+          ? "bg-navy-900 text-white"
+          : "border-b border-blue-100/80 bg-canvas/92 text-ink backdrop-blur"
+      }`}
+    >
       <Link
         href={link("/home")}
         className="flex items-center gap-2.5"
@@ -112,11 +123,13 @@ function TopBar() {
       >
         <span
           aria-hidden="true"
-          className="grid h-9 w-9 place-items-center rounded-[10px] bg-navy-900 text-[11px] font-bold text-yellow-500"
+          className={`grid h-9 w-9 place-items-center rounded-[10px] text-[11px] font-bold ${
+            onNavy ? "bg-yellow-500 text-navy-900" : "bg-navy-900 text-yellow-500"
+          }`}
         >
           CD
         </span>
-        <span className="text-[15px] font-bold tracking-[-0.01em] text-ink">
+        <span className="text-[15px] font-bold tracking-[-0.01em]">
           Share2Earn
         </span>
       </Link>
@@ -128,7 +141,11 @@ function TopBar() {
             onClick={() => setLangOpen((v) => !v)}
             aria-expanded={langOpen}
             aria-label={t("common.language")}
-            className="flex h-11 items-center gap-1 rounded-full px-2.5 text-[13px] font-bold text-ink-soft transition hover:bg-blue-100"
+            className={`flex h-11 items-center gap-1 rounded-full px-2.5 text-[13px] font-bold transition ${
+              onNavy
+                ? "text-blue-100 hover:bg-white/12"
+                : "text-ink-soft hover:bg-blue-100"
+            }`}
           >
             <IconGlobeLang size={19} />
             {LANGS.find((l) => l.code === lang)?.short}
@@ -169,7 +186,11 @@ function TopBar() {
           href={link("/activity")}
           onClick={() => markNotificationsRead(user.id)}
           aria-label={`${t("nav.activity")}${unread ? `, ${unread} unread` : ""}`}
-          className="relative grid h-11 w-11 place-items-center rounded-full text-ink-soft transition hover:bg-blue-100"
+          className={`relative grid h-11 w-11 place-items-center rounded-full transition ${
+            onNavy
+              ? "text-blue-100 hover:bg-white/12"
+              : "text-ink-soft hover:bg-blue-100"
+          }`}
         >
           <IconBell size={21} />
           {unread > 0 ? (

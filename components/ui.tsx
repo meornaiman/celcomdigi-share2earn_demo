@@ -8,7 +8,15 @@ import {
   type ComponentPropsWithRef,
   type ReactNode,
 } from "react";
-import { IconCheck, IconClock, IconClose, IconLock, IconShield } from "./icons";
+import {
+  IconArrowLeft,
+  IconCheck,
+  IconChevronRight,
+  IconClock,
+  IconClose,
+  IconLock,
+  IconShield,
+} from "./icons";
 import { useT } from "./providers";
 import type { RequestStatus, RiskLevel } from "@/lib/types";
 
@@ -38,6 +46,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   block?: boolean;
   href?: string;
   icon?: ReactNode;
+  /** Pins a trailing chevron to the right edge: this button moves you onward. */
+  advance?: boolean;
 }
 
 export function Button({
@@ -46,6 +56,7 @@ export function Button({
   block = true,
   href,
   icon,
+  advance = false,
   className = "",
   children,
   ...rest
@@ -53,7 +64,7 @@ export function Button({
   const sizing =
     size === "lg" ? "min-h-[54px] px-6 text-[17px]" : "min-h-[44px] px-4 text-[15px]";
   const classes = [
-    "inline-flex items-center justify-center gap-2 rounded-btn font-semibold",
+    "relative inline-flex items-center justify-center gap-2 rounded-btn font-semibold",
     "transition-[background-color,border-color,transform,filter] duration-150 active:scale-[0.985]",
     "disabled:pointer-events-none disabled:opacity-45",
     sizing,
@@ -62,18 +73,30 @@ export function Button({
     className,
   ].join(" ");
 
+  const body = (
+    <>
+      {icon}
+      {children}
+      {advance ? (
+        <IconChevronRight
+          size={18}
+          strokeWidth={2.4}
+          className="absolute right-4 opacity-70"
+        />
+      ) : null}
+    </>
+  );
+
   if (href) {
     return (
       <Link href={href} className={classes} role="button">
-        {icon}
-        {children}
+        {body}
       </Link>
     );
   }
   return (
     <button type="button" className={classes} {...rest}>
-      {icon}
-      {children}
+      {body}
     </button>
   );
 }
@@ -126,6 +149,48 @@ export function PageTitle({
         {children}
       </h1>
       {sub ? <p className="mt-1.5 text-[15px] text-ink-soft">{sub}</p> : null}
+    </header>
+  );
+}
+
+/**
+ * Back control and title on one line, subtitle beneath. Every screen below Home
+ * opens this way, so the way out is always in the same place under the thumb.
+ */
+export function ScreenHeader({
+  title,
+  sub,
+  onBack,
+  backLabel,
+  trailing,
+}: {
+  title: ReactNode;
+  sub?: ReactNode;
+  onBack: () => void;
+  backLabel: string;
+  trailing?: ReactNode;
+}) {
+  return (
+    <header className="mb-4">
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={onBack}
+          aria-label={backLabel}
+          className="-ml-2.5 grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink transition hover:bg-blue-100"
+        >
+          <IconArrowLeft size={21} />
+        </button>
+        <h1 className="min-w-0 flex-1 text-[20px] font-bold leading-tight tracking-[-0.015em] text-ink">
+          {title}
+        </h1>
+        {trailing}
+      </div>
+      {sub ? (
+        <p className="mt-0.5 pl-[34px] text-[15px] leading-snug text-ink-soft">
+          {sub}
+        </p>
+      ) : null}
     </header>
   );
 }

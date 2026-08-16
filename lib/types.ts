@@ -113,6 +113,17 @@ export interface HelpRequest {
   helper_response_ms?: number;
 }
 
+/**
+ * The three facts that decide an option, shown as an icon row on the approval
+ * screen. Structured rather than parsed out of the feature strings so the row
+ * stays predictable in both languages.
+ */
+export interface OptionHighlight {
+  icon: "data" | "social" | "time" | "calls" | "save";
+  title: string;
+  caption: string;
+}
+
 export interface TaskOption {
   id: string;
   help_request_id: string;
@@ -129,6 +140,8 @@ export interface TaskOption {
    * bullet list; `metadata_json` stays the machine-readable record.
    */
   features: string[];
+  /** Up to three; omitted when an option has no numbers worth surfacing. */
+  highlights?: OptionHighlight[];
   metadata_json: Record<string, string | number | boolean>;
   recommended: boolean;
 }

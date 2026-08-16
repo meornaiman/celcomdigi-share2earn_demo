@@ -1,8 +1,52 @@
 "use client";
 
-import { IconCheck } from "./icons";
+import {
+  IconBolt,
+  IconCheck,
+  IconClock,
+  IconData,
+  IconHeart,
+  IconPhoneCall,
+  IconTag,
+} from "./icons";
 import { formatMoney } from "@/lib/tasks";
-import type { TaskOption } from "@/lib/types";
+import type { OptionHighlight, TaskOption } from "@/lib/types";
+
+const HIGHLIGHT_ICON = {
+  data: IconData,
+  social: IconHeart,
+  time: IconClock,
+  calls: IconPhoneCall,
+  save: IconTag,
+} as const;
+
+/**
+ * The three deciding facts, side by side. This is the last thing the owner
+ * reads before approving, so it carries numbers rather than prose.
+ */
+export function HighlightRow({
+  highlights,
+}: {
+  highlights: OptionHighlight[];
+}) {
+  if (highlights.length === 0) return null;
+  return (
+    <ul className="mt-4 grid grid-cols-3 gap-2 border-t border-blue-500/20 pt-3.5">
+      {highlights.map((h) => {
+        const Icon = HIGHLIGHT_ICON[h.icon] ?? IconBolt;
+        return (
+          <li key={h.caption} className="text-center">
+            <span className="mx-auto mb-1.5 grid h-8 w-8 place-items-center rounded-full bg-blue-700/10 text-blue-700">
+              <Icon size={17} />
+            </span>
+            <p className="text-[14px] font-bold leading-tight text-ink">{h.title}</p>
+            <p className="text-[11.5px] leading-tight text-ink-soft">{h.caption}</p>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
 
 /**
  * Scannable anchor on the left of an option — "3 DAY", "70GB", "+RM42.50".
@@ -74,7 +118,10 @@ export function OptionSummary({
   option,
   highlight = false,
 }: {
-  option: Pick<TaskOption, "title" | "subtitle" | "price" | "badge" | "features">;
+  option: Pick<
+    TaskOption,
+    "title" | "subtitle" | "price" | "badge" | "features" | "highlights"
+  >;
   highlight?: boolean;
 }) {
   return (
@@ -95,7 +142,13 @@ export function OptionSummary({
           </p>
         ) : null}
       </div>
-      <FeatureList features={option.features} />
+      {/* Highlights replace the checklist when present — the approval screen
+          wants three facts, not a paragraph of ticks. */}
+      {option.highlights?.length ? (
+        <HighlightRow highlights={option.highlights} />
+      ) : (
+        <FeatureList features={option.features} />
+      )}
     </div>
   );
 }
