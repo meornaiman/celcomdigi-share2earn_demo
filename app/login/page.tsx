@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Avatar, Button, Card, Field, SecurityNote, TextInput } from "@/components/ui";
+import { BrandLogo } from "@/components/brand-logo";
 import { useT } from "@/components/providers";
 import { IconArrowLeft, IconSparkle } from "@/components/icons";
 import { useDb, useHydrated, useSessionUserId } from "@/lib/hooks";
@@ -63,16 +64,12 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-lg flex-col bg-canvas px-5 pb-8 pt-10">
       <header className="mb-8">
-        <span
-          aria-hidden="true"
-          className="mb-5 grid h-14 w-14 place-items-center rounded-[16px] bg-navy-900 text-[15px] font-bold text-yellow-500"
-        >
-          CD
-        </span>
-        <h1 className="text-[34px] font-bold leading-[1.1] tracking-[-0.03em] text-ink">
-          {t("login.title")}
+        {/* The mark carries the name, so it is the heading rather than an
+            ornament sitting above one. */}
+        <h1>
+          <BrandLogo height={52} />
         </h1>
-        <p className="mt-2 max-w-[22rem] text-[17px] leading-snug text-ink-soft">
+        <p className="mt-4 max-w-[22rem] text-[17px] leading-snug text-ink-soft">
           {t("login.tagline")}
         </p>
       </header>

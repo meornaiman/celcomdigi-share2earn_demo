@@ -13,6 +13,7 @@ import {
   IconRewards,
 } from "./icons";
 import { Avatar } from "./ui";
+import { BrandLogo } from "./brand-logo";
 import { useT, useToast, useLang } from "./providers";
 import {
   useAppLink,
@@ -67,10 +68,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 function BootSplash() {
   return (
     <div className="grid min-h-dvh place-items-center bg-canvas">
-      <div className="flex flex-col items-center gap-3">
-        <span className="grid h-14 w-14 place-items-center rounded-[16px] bg-navy-900 text-[15px] font-bold text-yellow-500">
-          CD
-        </span>
+      <div className="flex flex-col items-center gap-4">
+        <BrandLogo height={34} />
         <span className="h-1.5 w-24 overflow-hidden rounded-full bg-blue-100">
           <span className="block h-full w-1/2 animate-pulse rounded-full bg-blue-500" />
         </span>
@@ -116,24 +115,23 @@ function TopBar() {
           : "border-b border-blue-100/80 bg-canvas/92 text-ink backdrop-blur"
       }`}
     >
+      {/*
+        AIdealist is the app. Share2Earn and Family Mobility are the journeys
+        inside it, so the wordmark stays neutral between them.
+      */}
       <Link
         href={link("/home")}
         className="flex items-center gap-2.5"
         aria-label="AIdealist home"
       >
+        <BrandLogo variant="mark" height={26} plate />
         <span
-          aria-hidden="true"
-          className={`grid h-9 w-9 place-items-center rounded-[10px] text-[11px] font-bold ${
-            onNavy ? "bg-yellow-500 text-navy-900" : "bg-navy-900 text-yellow-500"
+          className={`text-[15px] font-bold tracking-[-0.01em] ${
+            onNavy ? "text-white" : "text-ink"
           }`}
         >
-          CD
+          AIdealist
         </span>
-        {/*
-          AIdealist is the app. Share2Earn and Family Mobility are the journeys
-          inside it, so the wordmark stays neutral between them.
-        */}
-        <span className="text-[15px] font-bold tracking-[-0.01em]">AIdealist</span>
       </Link>
 
       <div className="ml-auto flex items-center gap-1">

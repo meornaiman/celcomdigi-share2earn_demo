@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BrandLogo } from "./brand-logo";
 
 /**
  * Shared presenter-mode chrome. Both demos sit on the same navy stage with the
@@ -24,12 +25,7 @@ export function DemoStage({
     <div className="min-h-dvh bg-navy-900 text-white">
       <div className="mx-auto max-w-[1600px] px-5 py-6">
         <header className="flex flex-wrap items-center gap-4">
-          <span
-            aria-hidden="true"
-            className="grid h-11 w-11 place-items-center rounded-[13px] bg-yellow-500 text-[13px] font-bold text-navy-900"
-          >
-            CD
-          </span>
+          <BrandLogo variant="mark" height={30} plate />
           <div className="mr-auto">
             <h1 className="text-[22px] font-bold tracking-[-0.02em]">{title}</h1>
             <p className="text-[14px] text-white/65">{subtitle}</p>

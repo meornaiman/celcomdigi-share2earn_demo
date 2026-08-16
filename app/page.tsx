@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useHydrated, useSessionUserId } from "@/lib/hooks";
+import { BrandLogo } from "@/components/brand-logo";
 
 /**
  * Entry point. A static export has no server to redirect, so the decision is
@@ -21,10 +22,7 @@ export default function Index() {
   return (
     <div className="grid min-h-dvh place-items-center bg-canvas">
       <div className="flex flex-col items-center gap-4">
-        <span className="grid h-16 w-16 place-items-center rounded-[18px] bg-navy-900 text-[17px] font-bold text-yellow-500">
-          CD
-        </span>
-        <p className="text-[15px] font-semibold text-ink-soft">AIdealist</p>
+        <BrandLogo height={40} />
       </div>
     </div>
   );
